@@ -19,6 +19,7 @@
 #elif defined(__unix__)
     #define OS_LINUX
     #include <stdint.h>
+    #include <memory>
 #endif
 
 #define all(v) v.begin(), v.end()

@@ -1,3 +1,6 @@
 #pragma once
 
-#include <pthread.h>
+#include <unistd.h>
+#include <errno.h>
+#include <signal.h>
+#include <spawn.h>

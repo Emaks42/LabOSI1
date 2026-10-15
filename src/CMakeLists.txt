@@ -25,7 +25,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(SOURCE_LIB os_interaction/Windows)
 endif ()
 
-add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_LIB} os_interaction/basic/thread/thread.cpp)
-target_link_libraries(${CMAKE_PROJECT_NAME}_exe PRIVATE ${CMAKE_PROJECT_NAME}_lib)
-
 add_executable(${CMAKE_PROJECT_NAME}_exe main.cpp)
+
+include_directories(os_interaction/basic)
+include_directories(${SOURCE_LIB}/os_api.h)
+
+add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_LIB}/os.cpp)
+target_link_libraries(${CMAKE_PROJECT_NAME}_exe PRIVATE ${CMAKE_PROJECT_NAME}_lib)

@@ -1,4 +1,4 @@
-#include "os_api.h"
+#include "./os_api.h"
 #include "os.h"
 #include "logs.h"
 
@@ -19,51 +19,24 @@ bool os::create_proc(const ProcessStartInfo& info)
 {
     STARTUPINFO cif;
     ZeroMemory(&cif, sizeof(STARTUPINFO));
-
-    if (!info.flags & ProcessStartInfo::FOCUSED) {
-        cif.wShowWindow = SW_SHOWMINNOACTIVE;
-        cif.dwFlags = STARTF_USESHOWWINDOW;
-    }
-
     BOOL redirectHandles = FALSE;
-    if (info.redirectStdin || info.redirectStdout || info.redirectStderr) {
-        cif.dwFlags |= STARTF_USESTDHANDLES;
-        redirectHandles = TRUE;
-
-        if (info.redirectStdin) {
-            cif.hStdInput = info.redirectStdin;
-        }
-        if (info.redirectStdout) {
-            cif.hStdOutput = info.redirectStdout;
-        }
-        if (info.redirectStderr) {
-            cif.hStdError = info.redirectStderr;
-        }
-    }
-
     BOOL isSuccess = FALSE;
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
 
-    std::string cmd = info.executeCmdAsShell ? info.cmd : generate_app_cmd(info.cmd.c_str(), info.args);
+    std::string cmd = generate_app_cmd(info.cmd.c_str(), info.args);
 
     DWORD creationFlags = CREATE_DEFAULT_ERROR_MODE;
-    if (info.flags & ProcessStartInfo::HIDDEN) {
-        creationFlags |= CREATE_NO_WINDOW;
-    } else {
-        if (!(info.flags & ProcessStartInfo::USE_PARENT_CONSOLE)) {
-            creationFlags |= CREATE_NEW_CONSOLE;
-        }
-    }
+    creationFlags |= CREATE_NO_WINDOW;
 
-    BOOL res = CreateProcess(info.executeCmdAsShell ? nullptr : const_cast<WCHAR*>(std::wstring(info.cmd.begin(),info.cmd.end()).c_str()),
+    BOOL res = CreateProcess(nullptr,
         const_cast<WCHAR*>(std::wstring(cmd.begin(),cmd.end()).data()),
         nullptr,
         nullptr,
         redirectHandles,
         creationFlags,
         nullptr,
-        info.workDir.empty() ? nullptr : std::wstring(info.workDir.begin(),info.workDir.end()).c_str(),
+        nullptr,
         &cif,
         &pi);
 
@@ -133,7 +106,16 @@ bool os::create_pipe(FileHandle& outReadPipe, FileHandle& outWritePipe)
 int os::pipe_write(FileHandle pipe, const void* buf, int count)
 {
     DWORD countWritten;
-    if (WriteFile(pipe, buf, count, &countWritten, nullptr)) {
+    BOOL RES{};
+    do {
+        BOOL RES = WriteFile(pipe, buf, count, &countWritten, nullptr);
+        if (RES == FALSE) {
+            std::stringstream error;
+            error << "WriteFile failed. Error code: 0x" << std::hex << GetLastError();
+            LogErr("os/win_32", error.str());
+        }
+    } while (0);
+    if (RES) {
         return countWritten;
     }
     return -1;
@@ -142,7 +124,16 @@ int os::pipe_write(FileHandle pipe, const void* buf, int count)
 int os::pipe_read(FileHandle pipe, void* buf, int count)
 {
     DWORD countRead;
-    if (ReadFile(pipe, buf, count, &countRead, nullptr)) {
+    BOOL RES{};
+    do {
+        BOOL RES = ReadFile(pipe, buf, count, &countRead, nullptr);
+        if (RES == FALSE) {
+            std::stringstream error;
+            error << "ReadFile failed. Error code: 0x" << std::hex << GetLastError();
+            LogErr("os/win_32", error.str());
+        }
+    } while (0);
+    if (RES) {
         return countRead;
     }
     return -1;

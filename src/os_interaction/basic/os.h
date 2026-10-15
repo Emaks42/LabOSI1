@@ -12,30 +12,16 @@ struct ProcessHandleDummy { };
 typedef ProcessHandleDummy* ProcessHandle;
 
 struct ProcessStartInfo {
-    enum FLAGS : BYTE {
-        FOCUSED = 0,
-        HIDDEN,
-        USE_PARENT_CONSOLE,
-
-        LAST
-    };
 
     std::string cmd;
     std::vector<std::string> args;
-    std::string workDir;
-    BYTE flags;
-    bool executeCmdAsShell = false;
-
-    FileHandle redirectStdin = nullptr;
-    FileHandle redirectStdout = nullptr;
-    FileHandle redirectStderr = nullptr;
 
     ProcessStartInfo() = default;
 };
 
-bool create_proc(const ProcessStartInfo& args);
+std::string os::generate_app_cmd(const char* cmd, const std::vector<std::string>& args);
 
-std::string generate_app_cmd(const char* cmd, const std::vector<std::string>& args);
+bool create_proc(const ProcessStartInfo& args);
 
 void close_proc(ProcessHandle proc);
 
