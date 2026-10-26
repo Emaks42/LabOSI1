@@ -11,25 +11,44 @@ typedef FileHandleDummy* FileHandle;
 struct ProcessHandleDummy { };
 typedef ProcessHandleDummy* ProcessHandle;
 
+struct Process {
+    int pid;
+    ProcessHandle handle;
+};
+
+struct File {
+    int id = -1;
+    FileHandle handle = nullptr;
+};
+
 struct ProcessStartInfo {
 
     std::string cmd;
     std::vector<std::string> args;
 
+    File redirectStdin = {-1,nullptr};
+    File redirectStdout = {-1,nullptr};
+
     ProcessStartInfo() = default;
 };
 
-std::string os::generate_app_cmd(const char* cmd, const std::vector<std::string>& args);
+Process create_proc(ProcessStartInfo& args);
 
-bool create_proc(const ProcessStartInfo& args);
+void close_proc(Process proc);
 
-void close_proc(ProcessHandle proc);
+void kill_proc(Process proc, uint32_t ret = -1);
 
-void kill_proc(ProcessHandle proc, uint32_t ret = -1);
+bool create_pipe(File& readPipe, File& writePipe);
 
-bool create_pipe(FileHandle& readPipe, FileHandle& writePipe);
+int pipe_write(File pipe, const void* buf, int count);
 
-int pipe_write(FileHandle pipe, const void* buf, int count);
+int pipe_read(File pipe, void* buf, int count);
 
-int pipe_read(FileHandle pipe, void* buf, int count);
+int get_current_pid();
+
+File get_stdin();
+
+File get_stdout();
+
+void close_file(File f);
 } // namespace

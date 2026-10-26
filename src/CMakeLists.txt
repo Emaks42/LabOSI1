@@ -26,9 +26,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif ()
 
 add_executable(${CMAKE_PROJECT_NAME}_exe main.cpp)
+add_executable(${CMAKE_PROJECT_NAME}_exe_child1 child1.cpp)
+add_executable(${CMAKE_PROJECT_NAME}_exe_child2 child2.cpp)
 
 include_directories(os_interaction/basic)
-include_directories(${SOURCE_LIB}/os_api.h)
+include_directories(${SOURCE_LIB})
 
 add_library(${CMAKE_PROJECT_NAME}_lib ${SOURCE_LIB}/os.cpp)
 target_link_libraries(${CMAKE_PROJECT_NAME}_exe PRIVATE ${CMAKE_PROJECT_NAME}_lib)
+target_link_libraries(${CMAKE_PROJECT_NAME}_exe_child1 PRIVATE ${CMAKE_PROJECT_NAME}_lib)
+target_link_libraries(${CMAKE_PROJECT_NAME}_exe_child2 PRIVATE ${CMAKE_PROJECT_NAME}_lib)
