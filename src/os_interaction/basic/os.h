@@ -12,8 +12,8 @@ struct ProcessHandleDummy { };
 typedef ProcessHandleDummy* ProcessHandle;
 
 struct Process {
-    int pid;
-    ProcessHandle handle;
+    int pid = -1;
+    ProcessHandle handle = nullptr;
 };
 
 struct File {

@@ -1,4 +1,3 @@
-#include "os_api.h"
 #include "os.h"
 #include "logs.h"
 
@@ -7,8 +6,8 @@ using namespace os;
 
 #define SYS_CALL_AND_LOG(call)                                                        \
     do {                                                                              \
-        int RES = call;                                                              \
-        if (RES == -1) {                                                           \
+        int RES = call;                                                               \
+        if (RES == -1) {                                                              \
             std::stringstream error;                                                  \
             error << #call << " failed. Error code: 0x" << std::hex << (int)errno;    \
             LogErr("os/posix", error.str());                                          \

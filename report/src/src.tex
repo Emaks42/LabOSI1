@@ -1,0 +1,67 @@
+\section{Метод решения}
+Код данной лабораторной работы был написан так, чтобы его можно было запускать как на операционных системах POSIX, так и на Windows.
+Это было сделано благодаря реализации общего интерфейса для взаимодействия с операционной системой.
+При запуске основной программы помимо родительского процесса запускаются два дочерних, все процессы связаны между собой через 3 pipe'a, с системным вводом и выводом взаимодейтсвует только родительский процесс, ввод и вывод дочерних процессов перенаправляются в pipe'ы
+
+\section{Описание программы}
+Общий интерфейс взаимодействия с операционной системой описан в заголовочном файле src/os\_interaction/basic/os.h.
+При компиляции программы в ней выбирается та или иная реализация требуемых в работе функций, файлы с реализацией этих функций под разные системы находятся в папках src/os\_interaction/POSIX и src/os\_interaction/Windows
+Основной код программы находится в файлах main.cpp, child1.cpp, child2.cpp
+
+\textit{Осонвные структуры}
+\begin{lstlisting}[language=C++]
+struct FileHandleDummy { };
+typedef FileHandleDummy* FileHandle;
+
+struct ProcessHandleDummy { };
+typedef ProcessHandleDummy* ProcessHandle;
+\end{lstlisting}
+Две структуры для описания HANDLE файлов и процессов для Windows.
+
+\begin{lstlisting}[language=C++]
+struct Process {
+    int pid = -1;
+    ProcessHandle handle = nullptr;
+};
+
+struct File {
+    int id = -1;
+    FileHandle handle = nullptr;
+};
+\end{lstlisting}
+Базовые структуры для описания процессов в Windows и POSIX.
+
+\begin{lstlisting}[language=C++]
+struct ProcessStartInfo {
+
+    std::string cmd;
+    std::vector<std::string> args;
+
+    File redirectStdin = {-1,nullptr};
+    File redirectStdout = {-1,nullptr};
+
+    ProcessStartInfo() = default;
+};
+\end{lstlisting}
+Структура для описания параметров инициализации процесса (ключевые параметры - cmd, redirectStdin и redirectStdout).
+
+\textit{Используемые системные вызовы}
+
+Windows:
+\begin{itemize}
+  \item CreateProcess - создание процесса.
+  \item TerminateProcess - принудительная остановка процесса.
+  \item CreatePipe - создание pipe.
+  \item GetStdHandle - получение стандартного потока ввода и вывода.
+  \item Write - запись в поток.
+  \item Read - чтение из потока.
+\end{itemize}
+
+POSIX:
+\begin{itemize}
+  \item posix\_spawn - создание процесса по сути является последовательным вызовом fork и execl (ещё можно между ними добавить dup2 или close), использован вместо fork и execl из-за похожести синтаксиса на CreateProcess, что повышает читаемость кода.
+  \item kill - отправка процессу сигнала об окончании работы (SIGTERM или SIGKILL).
+  \item pipe - создание pipe для POSIX.
+  \item write - запись в поток.
+  \item read - чтение из потока.
+\end{itemize}

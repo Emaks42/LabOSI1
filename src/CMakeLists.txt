@@ -14,7 +14,7 @@ endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   message("Build for Linux")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=address -g -pthread")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=address -g")
   set(SOURCE_LIB os_interaction/POSIX)
 endif ()
 
